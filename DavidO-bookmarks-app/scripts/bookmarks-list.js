@@ -36,8 +36,8 @@ const bookmarkList = (function(){
       // const checkedClass = item.checked ? 'shopping-item__checked' : '';
       // const editBtnStatus = item.checked ? 'disabled' : '';
   
-      let itemTitle = `<span class="shopping-item ">${item.title}</span>`;
-      let itemRating = `<span class="shopping-item ">${item.rating}</span>`;
+      let bookmarkTitle = `<span class="shopping-item ">${item.title}</span>`;
+      let bookmarkRating = `<span class="shopping-item ">${item.rating}</span>`;
       // if (item.isEditing) {
       //   itemTitle = `
       //     <form class="js-edit-item">
@@ -47,9 +47,9 @@ const bookmarkList = (function(){
       // }
     
       return `
-        <li class="js-item-element" data-item-id="${item.id}">
-          ${itemTitle} 
-          ${itemRating}
+        <li class="js-bookmark-element" data-item-id="${item.id}">
+          ${bookmarkTitle} 
+          ${bookmarkRating}
           <div class="bookmark-item-controls">
             <button class="bookmark-item-toggle js-item-toggle">
               <span class="button-label">Expand</span>
@@ -67,7 +67,6 @@ const bookmarkList = (function(){
       return items.join('');
     }
 
-
     // render the shopping list in the DOM
     console.log('`render` ran');
     const bookmarkListItemsString = generateBookmarkItemsString(store.items);
@@ -76,6 +75,7 @@ const bookmarkList = (function(){
     $('.js-bookmark-list').html(bookmarkListItemsString);
 
     // This if else block toggles the add bookmark form
+
     if (store.adding === true){
       $('.bookmarkDropDown').html(
 
@@ -84,8 +84,9 @@ const bookmarkList = (function(){
         <input class = "url">URL</input>
         <input class = "description">Description</input>
         <input class = "rating">Rating</input>
-        </form>
-        <button class = "submitBookmark">Submit</button>`
+        <button class = "submitBookmark" type = submit>Submit</button>
+        </form>`
+
 
       );
     }
@@ -93,26 +94,23 @@ const bookmarkList = (function(){
       $('.bookmarkDropDown').html(
         ''
       );   
-    }
-
-    
-    
-    //This if else block toggles the expand form 
+    }   
     
     
   }
 
-  //this function does not appear to be correctly targeting the correct item 
-  //since the console.log does not occur. I've tried  
+
+  
 
   function handleNewItemSubmit() {
-    $('.submitBookmark').submit(function (event) {
+    $('.bookmarkDropDown').submit(function (event) {
       event.preventDefault();
       console.log('submit was clicked');
-      const newBookmarkTitle = $('.js-bookmark-list-entry').val();
-      const newBookmarkURL = $('.title').val();
+      const newBookmarkTitle = $('.title').val();
+      const newBookmarkURL = $('.url').val();
       const newBookmarkDesc = $('.description').val();
       const newBookmarkRating = $('.rating').val();
+      console.log(newBookmarkTitle,newBookmarkURL,newBookmarkDesc, newBookmarkRating);
       $('.js-shopping-list-entry').val('');
       api.createBookmark(newBookmarkTitle,newBookmarkURL,newBookmarkDesc, newBookmarkRating)
         .then((newBookmark) => {
@@ -139,22 +137,36 @@ const bookmarkList = (function(){
   }
 
   //this is not correctly activating. 
-  function expandedBookmark(){
-    $('.bookmark-item-toggle').click(()=>{
-      console.log('expand button was clicked');
-      store.expanded === !store.expanded;
-      if (store.expanded === true){
-        console.log(item.id,item.desc, item.url, item.rating,)
-      };
 
+
+  // function expandedBookmark(){
+  //   $('.js-bookmark-list').click(()=>{
+  //     console.log('expand button was clicked');
+  //     store.expanded === !store.expanded;
+  //     if (store.expanded === true){
+  //       console.log(item.id,item.desc, item.url, item.rating,)
+  //     };
+
+  //     render();
+  //   });
+  // }
+
+
+  // Handler for condensing/expanding bookmark
+  function expandedBookmark() {
+    $('.js-bookmark-list').on('click', '.js-bookmark-header', event => {
+      // Sets expanded status on the target by ID
+      store.expandingBookmarkToggle(getItemIdFromElement(event.currentTarget));
       render();
     });
   }
 
 
+
+
   function getItemIdFromElement(item) {
     return $(item)
-      .closest('.js-item-element')
+      .closest('.js-bookmark-element')
       .data('item-id');
   }   
 
@@ -162,7 +174,7 @@ const bookmarkList = (function(){
     $('.js-bookmark-list').on('click', '.js-item-delete', event => {
       const id = getItemIdFromElement(event.currentTarget);
       console.log('delete button was clicked');
-      api.deleteItem(id)
+      api.deleteBookmarks(id)
         .then(() => {
           store.findAndDelete(id);
           render();
